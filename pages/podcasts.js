@@ -6,16 +6,16 @@ import InfiniteLoad from '@components/InfiniteLoad'
 import { useState, useEffect } from 'react'
 import { ITEMS_PER_PAGE } from 'constants'
 
-export default function Home(props) {
-    const { genres } = props
+export default function Podcasts(props) {
+    const { playlists } = props
     const [currentPage, setCurrentPage] = useState(1)
-    const [genreList, setGenreList] = useState(genres)
+    const [playlist, setPlaylist] = useState(playlists)
 
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if (loading) {
-            setGenreList(genres.slice((currentPage - 1) * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE)))
+            setPlaylist(playlists.slice((currentPage - 1) * ITEMS_PER_PAGE, (currentPage * ITEMS_PER_PAGE)))
             setLoading(false)
         }
     }, [loading])
@@ -25,20 +25,20 @@ export default function Home(props) {
             <Head>
                 <title>Spotify /</title>
             </Head>
-            <h1>Genres</h1>
+            <h1>Playlists</h1>
             <div className={styles.grid_container}>
-                {loading ? <p>Loading...</p> : genreList.map(genre =>
-                    <div key={genre}>
-                        <Link href={`/${genre}`}>
-                            <a className={styles.genre}>{genre}</a>
+                {loading ? <p>Loading...</p> : playlist.map(playlist =>
+                    <div key={playlist.name}>
+                        <Link href={`/${playlist.name}`}>
+                            <a className={styles.genre}>{playlist.name}</a>
                         </Link>
                     </div>
                 )}
             </div>
             <InfiniteLoad
                 loading={loading}
-                arr={genres}
-                setList={setGenreList}
+                arr={playlists}
+                setList={setPlaylist}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
             />
@@ -48,7 +48,7 @@ export default function Home(props) {
 
 
 export async function getStaticProps() {
-    const { genres } = await fetch("https://api.spotify.com/v1/recommendations/available-genre-seeds", {
+    const { playlists } = await fetch("https://api.spotify.com/v1/browse/featured-playlists", {
         headers: {
             Authorization: `Bearer ${process.env.SPOTIFY_OAUTH_TOKEN}`
         }
@@ -56,7 +56,7 @@ export async function getStaticProps() {
 
     return {
         props: {
-            genres
+            playlists: playlists.items
         }
     }
 }
